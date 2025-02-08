@@ -55,7 +55,7 @@ const sendMessage = () => {
 <template>
   <div class="container mx-auto">
     <div class="flex justify-start border-b">
-      <img src="/public/deriv-logo.jpg" alt="" class="h-14">
+      <img src="/deriv-logo.jpg" alt="" class="h-14">
       <!-- <div
         class="w-fit bg-primary text-white font-semibold my-3.5 px-2 py-1 rounded-lg cursor-pointer hover:bg-red-700"
         @click="isConversationOpen = true"
