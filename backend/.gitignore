@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*/credentials/*
+/backend/western-dock-425412-t6-d105abcfb332.json
+.venv
+*.pyc
+*.sqlite3
+.DS_Store
+venv/
