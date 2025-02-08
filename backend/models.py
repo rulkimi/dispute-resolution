@@ -34,6 +34,8 @@ class Evidence(BaseModel):
 
 class DisputeSubmission(BaseModel):
     transaction_id: str
+    buyer_id: str
+    seller_id: str
     dispute_type: DisputeType
     amount: float
     currency: str
