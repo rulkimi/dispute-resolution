@@ -31,7 +31,7 @@ const isLoading = ref(false);
 const isConversationOpen = ref(false)
 const orderIds = ref([
   { orderId: '12345', date: '2023-10-27', amount: '$10', status: 'Pending' },
-  { orderId: '67890', date: '2023-10-26', amount: '$20', status: 'Completed' },
+  { orderId: '67890', date: '2023-10-26', amount: '$20', status: 'In Dispute' },
   { orderId: '13579', date: '2023-10-25', amount: '$30', status: 'Pending' },
 ]);
 const activeOrderId = ref("");
@@ -80,13 +80,22 @@ const sendMessage = () => {
             <td class="p-2">{{ order.orderId }}</td>
             <td class="p-2">{{ order.date }}</td>
             <td class="p-2">{{ order.amount }}</td>
-            <td class="p-2">{{ order.status }}</td>
+            <td class="p-2" :class="{'text-primary': order.status === 'In Dispute'}">{{ order.status }}</td>
             <td class="p-2 text-right">
               <button
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-full"
+                :class="{
+                  'bg-primary text-white': order.status === 'In Dispute',
+                  'border border-primary text-primary hover:bg-primary hover:text-white': order.status !== 'In Dispute',
+                }"
+                class="py-1 px-3 rounded-full"
                 @click="raiseDispute(order.orderId)"
               >
-                Raise Dispute
+                <template v-if="order.status === 'In Dispute'">
+                  <font-awesome-icon :icon="['fas', 'circle-exclamation']" class="text-white" /> Check Dispute
+                </template>
+                <template v-else>
+                  Raise Dispute
+                </template>
               </button>
             </td>
           </tr>

@@ -24,7 +24,7 @@
               <div
                 class="p-3"
                 :class="{
-                  'bg-primary text-white max-w-xs rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-sm': message.role === 'human',
+                  'bg-primary text-white max-w-md rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-sm': message.role === 'human',
                   'bg-gray-100 text-black min-w-xs max-w-lg rounded-tl-xl rounded-tr-xl rounded-br-xl': message.role === 'ai',
                 }"
               >
