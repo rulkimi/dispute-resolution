@@ -51,7 +51,7 @@ class EvidenceDB(Base):
     file_type = Column(String)
     upload_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     verification_status = Column(String, nullable=True)
-    metadata = Column(JSON, default={})
+    evidence_metadata = Column(JSON, default={})
     dispute_id = Column(Integer, ForeignKey("disputes.id"))
     dispute = relationship("DisputeSubmissionDB", back_populates="evidence")
 
@@ -112,9 +112,9 @@ def update_evidence_metadata(evidence_id: int, metadata: dict):
     db = SessionLocal()
     evidence = db.query(EvidenceDB).filter(EvidenceDB.id == evidence_id).first()
     if evidence:
-        current_metadata = evidence.metadata or {}
+        current_metadata = evidence.evidence_metadata or {}
         current_metadata.update(metadata)
-        evidence.metadata = current_metadata
+        evidence.evidence_metadata = current_metadata #Correct field
         db.commit()
         db.refresh(evidence)
     db.close()

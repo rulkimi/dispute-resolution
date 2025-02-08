@@ -29,7 +29,8 @@ class Evidence(BaseModel):
     file_type: ProofType
     upload_timestamp: datetime = Field(default_factory=lambda: datetime.now(ZoneInfo("Asia/Kuala_Lumpur")))
     verification_status: Optional[str] = None
-    metadata: dict = Field(default_factory=dict)
+    evidence_metadata: dict = Field(default_factory=dict)
+    transcript: Optional[str] = None
 
 
 class DisputeSubmission(BaseModel):
