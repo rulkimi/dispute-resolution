@@ -1,3 +1,5 @@
+# Ignore credentials
+backend/credentials/*.json
 .env
 __pycache__/
 */credentials/*

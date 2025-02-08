@@ -1,8 +1,13 @@
-# models.py
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from enum import Enum
 from datetime import datetime
+from zoneinfo import ZoneInfo
+import pytz
+
+kuala_lumpur=pytz.timezone('Asia/Kuala_Lumpur')
+now = datetime.now(ZoneInfo("Asia/Kuala_Lumpur"))
+print(now)
 
 class ChatMessage(BaseModel):
     sender_id: str
@@ -22,16 +27,19 @@ class ProofType(str, Enum):
 class Evidence(BaseModel):
     file_url: str
     file_type: ProofType
-    upload_timestamp: datetime = Field(default_factory=datetime.utcnow)
+    upload_timestamp: datetime = Field(default_factory=lambda: datetime.now(ZoneInfo("Asia/Kuala_Lumpur")))
     verification_status: Optional[str] = None
     metadata: dict = Field(default_factory=dict)
 
+
 class DisputeSubmission(BaseModel):
     transaction_id: str
+    buyer_id: str
+    seller_id: str
     dispute_type: DisputeType
     amount: float
     currency: str
     evidence: Optional[Evidence] = None
     additional_info: Optional[str] = None
     status: str = "pending"
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(ZoneInfo("Asia/Kuala_Lumpur")))

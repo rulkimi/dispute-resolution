@@ -1,50 +1,40 @@
-# agents/fraud_detection.py
-from typing import Dict, List, Tuple
-import re
-from datetime import datetime
+from typing import Tuple, List
+from models import ChatMessage
 
 class FraudDetector:
     def __init__(self):
-        self.suspicious_patterns = {
-            'external_platform': [
-                r'(?i)let\'s (?:continue|talk|chat|move) (?:on|to) (?:whatsapp|telegram|messenger|signal|wechat|viber)',
-                r'(?i)(?:whatsapp|telegram|messenger|signal|wechat|viber)[\s]*?(?:number|contact|id)?[\s]*?[:\s]+[\d\w@]+',
-            ],
-            'urgency_pressure': [
-                r'(?i)urgent(?:ly)? need',
-                r'(?i)(?:transfer|send|pay).*?now.*?urgent',
-            ],
-            'suspicious_amounts': [
-                r'(?i)different amount',
-                r'(?i)change(?:d) (?:the )?(?:amount|price)',
-            ]
-        }
-        self.compiled_patterns = self._compile_patterns()
-        
-    def _compile_patterns(self) -> Dict[str, List[re.Pattern]]:
-        return {
-            category: [re.compile(pattern) for pattern in patterns]
-            for category, patterns in self.suspicious_patterns.items()
-        }
+        # Initialize any necessary resources, e.g., load a pre-trained model or rules.
+        # For this prototype, we'll use a simple keyword-based approach.
+        self.suspicious_keywords = ["urgent", "guarantee", "free money", "password", "bank details"]
 
-    def analyze_message(self, message: str, context: dict = None) -> Tuple[bool, List[dict]]:
+    def analyze_message(self, message_text: str) -> Tuple[bool, List[str]]:
+        """
+        Analyzes a chat message for suspicious content.
+
+        Args:
+            message_text: The text of the chat message.
+
+        Returns:
+            A tuple: (is_suspicious, alerts).
+            is_suspicious: True if the message is deemed suspicious, False otherwise.
+            alerts: A list of strings describing the detected suspicious patterns.
+        """
         alerts = []
-        
-        for category, patterns in self.compiled_patterns.items():
-            for pattern in patterns:
-                if pattern.search(message):
-                    alerts.append({
-                        "type": category,
-                        "pattern_matched": pattern.pattern,
-                        "timestamp": datetime.now(),
-                        "severity": "high" if category == "external_platform" else "medium"
-                    })
-        
-        return bool(alerts), alerts
+        is_suspicious = False
+        message_text_lower = message_text.lower()
 
-detector = FraudDetector()
-message = "Let's continue this on WhatsApp"
-is_fraud, alerts = detector.analyze_message(message)
+        for keyword in self.suspicious_keywords:
+            if keyword in message_text_lower:
+                alerts.append(f"Suspicious keyword detected: '{keyword}'")
+                is_suspicious = True
 
-print(is_fraud)  # True
-print(alerts)    # [{'type': 'external_platform', 'pattern_matched': "...", 'timestamp': ..., 'severity': 'high'}]
+        return is_suspicious, alerts
+
+    async def _check_fraud_history(self, dispute):
+        # Placeholder for checking historical fraud data.  In a real system,
+        # this would query a database of past user behavior, transactions, and
+        # any previous fraud reports.
+        # For now, we'll simulate a simple check.
+        if "user123" in [dispute.buyer_id, dispute.seller_id]:  # Example: Check if user123 is involved
+            return {"has_alerts": True, "details": ["Previous report for phishing."]}
+        return {"has_alerts": False}

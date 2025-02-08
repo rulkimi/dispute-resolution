@@ -4,16 +4,16 @@ import Textarea from '@/components/textarea.vue'
 import { ref } from 'vue';
 
 const messages = ref([
-  { 
+  {
     role: 'ai',
     content: 'Hello Joel! \n\n Are you looking to raise a dispute? Please choose the type of dispute that best describes your concern and provide a brief explanation of the issue.',
     type: 'start'
   },
   { role: 'human', content: 'The seller said that they did not receive the payment, but I have made the payment. ', type: 'text' },
-  { 
+  {
     role: 'ai',
     content: "Got it! We've received your dispute and are reviewing the details. We'll get back to you shortly.",
-    type: 'attachment' 
+    type: 'attachment'
   },
   { role: 'ai', content: "Our review found that you made an external payment, which is not recommended by Deriv. As a result, your dispute has been declined, and the funds will not be released.", type: 'text' },
 ])
@@ -43,11 +43,39 @@ const raiseDispute = (orderId) => {
   // send api request here
 }
 
-const sendMessage = () => {
+const sendMessage = async () => {
   isLoading.value = true;
   if (query.value.trim() !== "") {
     messages.value.push({ role: 'human', content: query.value, type: 'text' });
+
+    try {
+      const response = await fetch('/api/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender_id: 'buyer123', // Replace with actual buyer ID
+          receiver_id: 'system', // Or 'agent'
+          message: query.value,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      messages.value.push({ role: 'ai', content: data.response, type: 'text' }); // Assuming the API returns a 'response' field
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      isLoading.value = false; // Ensure loading is set to false
+    }
+
     query.value = "";
+  } else {
+    isLoading.value = false;
   }
 };
 </script>
@@ -80,16 +108,12 @@ const sendMessage = () => {
             <td class="p-2">{{ order.orderId }}</td>
             <td class="p-2">{{ order.date }}</td>
             <td class="p-2">{{ order.amount }}</td>
-            <td class="p-2" :class="{'text-primary': order.status === 'In Dispute'}">{{ order.status }}</td>
+            <td class="p-2" :class="{ 'text-primary': order.status === 'In Dispute' }">{{ order.status }}</td>
             <td class="p-2 text-right">
-              <button
-                :class="{
-                  'bg-primary text-white': order.status === 'In Dispute',
-                  'border border-primary text-primary hover:bg-primary hover:text-white': order.status !== 'In Dispute',
-                }"
-                class="py-1 px-3 rounded-full"
-                @click="raiseDispute(order.orderId)"
-              >
+              <button :class="{
+                'bg-primary text-white': order.status === 'In Dispute',
+                'border border-primary text-primary hover:bg-primary hover:text-white': order.status !== 'In Dispute',
+              }" class="py-1 px-3 rounded-full" @click="raiseDispute(order.orderId)">
                 <template v-if="order.status === 'In Dispute'">
                   <font-awesome-icon :icon="['fas', 'circle-exclamation']" class="text-white" /> Check Dispute
                 </template>
@@ -103,17 +127,10 @@ const sendMessage = () => {
       </table>
     </div>
 
-    <div
-      class="fixed w-[600px] top-0 bottom-0 shadow-md transition-all duration-500 ease-out"
-      :class="isConversationOpen ? 'right-0' : 'right-[-1000px]'"
-    >
-      <Conversation
-        :messages="messages"
-        :loading="isLoading"
-        :loadingConversation="false"
-        @active-dispute="handleActiveDispute"
-        @attachment-selected="handleAttachmentSelected"
-      >
+    <div class="fixed w-[600px] top-0 bottom-0 shadow-md transition-all duration-500 ease-out"
+      :class="isConversationOpen ? 'right-0' : 'right-[-1000px]'">
+      <Conversation :messages="messages" :loading="isLoading" :loadingConversation="false"
+        @active-dispute="handleActiveDispute" @attachment-selected="handleAttachmentSelected">
         <template #header>
           <div class="flex items-center justify-between px-4 py-2 border-b">
             <div class="flex items-center gap-4">
@@ -135,12 +152,17 @@ const sendMessage = () => {
                 <div class="bg-gray-100 px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-200">
                   <font-awesome-icon :icon="['fas', 'paperclip']" />
                 </div>
-                <div class="bg-primary px-2 py-1 rounded-lg cursor-pointer hover:bg-red-700" @click="sendMessage">
+                <div
+                  :class="isLoading ? 'bg-gray-400' : 'bg-primary hover:bg-red-700'"
+                  class="px-2 py-1 rounded-lg cursor-pointer"
+                  @click="sendMessage"
+                  :disabled="isLoading"
+                >
                   <font-awesome-icon class="text-white" :icon="['fas', 'paper-plane']" />
                 </div>
               </div>
             </template>
-          </Textarea>
+    </Textarea>
         </template>
       </Conversation>
     </div>
