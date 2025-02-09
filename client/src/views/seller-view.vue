@@ -4,18 +4,36 @@ import Textarea from '@/components/textarea.vue'
 import { ref } from 'vue';
 
 const messages = ref([
-  { 
+  {
     role: 'ai',
-    content: 'Hello Joel! \n\n Are you looking to raise a dispute? Please choose the type of dispute that best describes your concern and provide a brief explanation of the issue.',
-    type: 'start'
+    content: 'Hello! We understand you are involved in a dispute regarding order #67890. We have received a report that the buyer may have requested to make a payment outside of the Deriv platform. We are investigating this matter to ensure the safety and security of our platform.',
+    type: 'text'
   },
-  { role: 'human', content: 'The seller said that they did not receive the payment, but I have made the payment. ', type: 'text' },
-  { 
+  {
+    role: 'human',
+    content: 'The buyer contacted me directly and said they were having trouble with the payment system on the platform.',
+    type: 'text'
+  },
+  {
     role: 'ai',
-    content: "Got it! We've received your dispute and are reviewing the details. We'll get back to you shortly.",
-    type: 'attachment' 
+    content: 'Thank you for your response. To help us with our investigation, could you please provide any communication logs or other evidence that supports your claim?',
+    type: 'attachment'
   },
-  { role: 'ai', content: "Our review found that you made an external payment, which is not recommended by Deriv. As a result, your dispute has been declined, and the funds will not be released.", type: 'text' },
+  {
+    role: 'human',
+    content: 'I can provide screenshots of our conversation.',
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: 'Thank you for providing the evidence. We are reviewing the information. Please note that facilitating transactions outside of the Deriv platform is strictly prohibited and can lead to account penalties. We will update you within 24-48 hours with the outcome of our investigation.',
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: 'Our investigation is complete. We have reviewed the evidence and determined that the buyer initiated the off-platform payment. While we understand the payment system may have presented challenges, facilitating transactions outside of the Deriv platform is a violation of our terms of service. This action compromises the security of our platform and puts both you and the buyer at risk. Your account has been temporarily suspended pending further review. We will contact you shortly with further instructions.',
+    type: 'text'
+  }
 ])
 
 const handleActiveDispute = (value) => {
@@ -31,7 +49,7 @@ const isLoading = ref(false);
 const isConversationOpen = ref(false)
 const orderIds = ref([
   { orderId: '12345', date: '2023-10-27', amount: '$10', status: 'Pending' },
-  { orderId: '67890', date: '2023-10-26', amount: '$20', status: 'Completed' },
+  { orderId: '67890', date: '2023-10-26', amount: '$20', status: 'In Dispute' },
   { orderId: '13579', date: '2023-10-25', amount: '$30', status: 'Pending' },
 ]);
 const activeOrderId = ref("");
@@ -82,11 +100,16 @@ const sendMessage = () => {
             <td class="p-2">{{ order.amount }}</td>
             <td class="p-2">{{ order.status }}</td>
             <td class="p-2 text-right">
-              <button
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded-full"
-                @click="raiseDispute(order.orderId)"
-              >
-                Raise Dispute
+              <button :class="{
+                'bg-primary text-white': order.status === 'In Dispute',
+                'border border-primary text-primary hover:bg-primary hover:text-white': order.status !== 'In Dispute',
+              }" class="py-1 px-3 rounded-full" @click="raiseDispute(order.orderId)">
+                <template v-if="order.status === 'In Dispute'">
+                  <font-awesome-icon :icon="['fas', 'circle-exclamation']" class="text-white" /> Check Dispute
+                </template>
+                <template v-else>
+                  Raise Dispute
+                </template>
               </button>
             </td>
           </tr>

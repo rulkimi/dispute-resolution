@@ -9,13 +9,42 @@ const messages = ref([
     content: 'Hello Joel! \n\n Are you looking to raise a dispute? Please choose the type of dispute that best describes your concern and provide a brief explanation of the issue.',
     type: 'start'
   },
-  { role: 'human', content: 'The seller said that they did not receive the payment, but I have made the payment. ', type: 'text' },
+  { role: 'human', content: 'I paid for the item, but the seller claims they never received the payment and hasn\'t sent it.', type: 'text' },
   {
     role: 'ai',
-    content: "Got it! We've received your dispute and are reviewing the details. We'll get back to you shortly.",
+    content: "Thank you for providing details about your dispute. I'm now reviewing the information you've provided. This may take a few minutes.",
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: "I've completed my review. Our investigation reveals a potential issue.  The seller's account shows no record of receiving the payment, however, we've uncovered evidence suggesting the seller may be using a secondary account to conduct transactions outside of our platform.",
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: "This is a serious violation of our terms of service. We are taking steps to address this issue and ensure the safety of our users. We've temporarily suspended the seller's accounts pending a full investigation.",
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: "To resolve your dispute, please provide us with proof of payment (e.g., bank statement, transaction ID).",
     type: 'attachment'
   },
-  { role: 'ai', content: "Our review found that you made an external payment, which is not recommended by Deriv. As a result, your dispute has been declined, and the funds will not be released.", type: 'text' },
+  {
+    role: 'ai',
+    content: "Thank you. We've received your proof of payment and are processing a full refund. You should see the funds credited to your account within 2-3 business days.",
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: "We sincerely apologize for the inconvenience caused by the seller's actions. We are committed to providing a safe and secure marketplace for all our users.",
+    type: 'end'
+  },
+  {
+    role: 'human',
+    content: 'Thank you!',
+    type: 'text'
+  },
 ])
 
 const handleActiveDispute = (value) => {
