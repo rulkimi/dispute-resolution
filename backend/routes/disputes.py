@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from db import DisputeSubmissionDB, SessionLocal, get_split_chat_history, update_evidence_metadata
 # from models import DisputeSubmission  # Correct model name (not DisputeSubmissionDB)
@@ -6,6 +6,9 @@ from agents.dispute_resolution import DisputeResolver
 from video_analysis import analyze_video
 import asyncio
 from pydantic import BaseModel
+from google.cloud import storage
+import os
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
@@ -124,3 +127,40 @@ async def interactive_dispute_chat(dispute_id: str, payload: ChatRequest, db: Se
     result = await dispute_resolver.interactive_chat(dispute, conversation_context, new_message)
     
     return result
+
+
+@router.post("/upload-video")
+async def upload_video(request: Request):
+    """
+    Generates a signed URL for uploading a video to Google Cloud Storage.
+
+    The client uploads the video directly to GCS using this URL.
+    """
+    try:
+        data = await request.json()
+        filename = data.get('filename')
+        content_type = data.get('contentType')
+
+        if not filename or not content_type:
+            raise HTTPException(status_code=400, detail="Filename and content type are required.")
+
+        # Initialize the GCS client
+        storage_client = storage.Client()
+        bucket_name = os.environ.get('GCS_BUCKET_NAME')
+        if not bucket_name:
+          raise HTTPException(status_code=500, detail="GCS_BUCKET_NAME environment variable not set.")
+        
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(filename)
+
+        # Generate a signed URL for uploading.  It expires in 15 minutes.
+        url = blob.generate_signed_url(
+            version="v4",
+            expiration=datetime.timedelta(minutes=15),
+            method="PUT",
+            content_type=content_type,
+        )
+        return {"url": url}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
