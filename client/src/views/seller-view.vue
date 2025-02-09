@@ -16,12 +16,12 @@ const messages = ref([
   },
   {
     role: 'ai',
-    content: 'Thank you for your response. To help us with our investigation, could you please provide any communication logs or other evidence that supports your claim?',
+    content: 'Thank you for your response. To help us with our investigation, could you please provide a video recording of your conversation?',
     type: 'attachment'
   },
   {
     role: 'human',
-    content: 'I can provide screenshots of our conversation.',
+    content: 'Sure, I can provide a video.',
     type: 'text'
   },
   {
@@ -146,9 +146,9 @@ const sendMessage = () => {
           <Textarea submit-on-enter id="query-input w-full" input-class="border" v-model="query" @submit="sendMessage">
             <template #append-icon>   
               <div class="flex gap-1">
-                <div class="bg-gray-100 px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-200">
+                <!-- <div class="bg-gray-100 px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-200">
                   <font-awesome-icon :icon="['fas', 'paperclip']" />
-                </div>
+                </div> -->
                 <div class="bg-primary px-2 py-1 rounded-lg cursor-pointer hover:bg-red-700" @click="sendMessage">
                   <font-awesome-icon class="text-white" :icon="['fas', 'paper-plane']" />
                 </div>

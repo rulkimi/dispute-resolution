@@ -17,7 +17,7 @@ const messages = ref([
   },
   {
     role: 'ai',
-    content: "I've completed my review. Our investigation reveals a potential issue.  The seller's account shows no record of receiving the payment, however, we've uncovered evidence suggesting the seller may be using a secondary account to conduct transactions outside of our platform.",
+    content: "I've completed my review. Our investigation reveals a potential issue. The seller's account shows no record of receiving the payment, however, we've uncovered evidence suggesting the seller may be using a secondary account to conduct transactions outside of our platform.",
     type: 'text'
   },
   {
@@ -27,17 +27,17 @@ const messages = ref([
   },
   {
     role: 'ai',
-    content: "To resolve your dispute, please provide us with proof of payment (e.g., bank statement, transaction ID).",
-    type: 'attachment'
-  },
-  {
-    role: 'ai',
-    content: "Thank you. We've received your proof of payment and are processing a full refund. You should see the funds credited to your account within 2-3 business days.",
+    content: "We understand your frustration. While we are investigating the seller's actions, we cannot issue a refund at this time.  We will issue a warning to the seller regarding conducting transactions outside of the platform. We will update you on the progress of our investigation and the next steps.",
     type: 'text'
   },
   {
     role: 'ai',
-    content: "We sincerely apologize for the inconvenience caused by the seller's actions. We are committed to providing a safe and secure marketplace for all our users.",
+    content: "Our investigation is complete.  We have determined that the seller violated our terms of service by conducting transactions outside of the platform. As a result, the seller's account has been permanently suspended. We have issued a warning to the seller and will be monitoring their activity closely. We are unable to issue a refund at this time due to the seller's actions.",
+    type: 'text'
+  },
+  {
+    role: 'ai',
+    content: "We sincerely apologize for the inconvenience this has caused. We are committed to providing a safe and secure marketplace for all our users.",
     type: 'end'
   },
   {
@@ -178,9 +178,9 @@ const sendMessage = async () => {
           <Textarea submit-on-enter id="query-input w-full" input-class="border" v-model="query" @submit="sendMessage">
             <template #append-icon>   
               <div class="flex gap-1">
-                <div class="bg-gray-100 px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-200">
+                <!-- <div class="bg-gray-100 px-2 py-1 rounded-lg cursor-pointer hover:bg-gray-200">
                   <font-awesome-icon :icon="['fas', 'paperclip']" />
-                </div>
+                </div> -->
                 <div
                   :class="isLoading ? 'bg-gray-400' : 'bg-primary hover:bg-red-700'"
                   class="px-2 py-1 rounded-lg cursor-pointer"
