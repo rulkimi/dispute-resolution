@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from chat import router as chat_router
 from dispute import router as dispute_router
+from routes.disputes import router as disputes_router
 from db import init_db  # Import the init_db function
 
 app = FastAPI()
@@ -11,6 +12,7 @@ init_db()
 
 app.include_router(chat_router, prefix="/chat")
 app.include_router(dispute_router, prefix="/dispute")
+app.include_router(disputes_router, prefix="/disputes")
 
 if __name__ == "__main__":
     import uvicorn

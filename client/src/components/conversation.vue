@@ -7,12 +7,8 @@
     <slot name="header"></slot>
     <div v-if="!loadingConversation" class="flex-grow flex flex-col gap-4 px-4 pt-4 overflow-auto">
       <template v-if="messages.length">
-        <div
-          v-for="(message, index) in messages"
-          :key="index"
-          class="message relative"
-          :class="{ 'self-end': message.role === 'human', 'self-start': message.role === 'ai' }"
-        >
+        <div v-for="(message, index) in messages" :key="index" class="message relative"
+          :class="{ 'self-end': message.role === 'human', 'self-start': message.role === 'ai' }">
           <div class="flex items-end gap-4">
             <!-- <div
               v-if="message.role === 'ai'"
@@ -21,27 +17,17 @@
               <font-awesome-icon :icon="['fas', 'robot']" class="text-primary" />
             </div> -->
             <div class="flex flex-col">
-              <div
-                class="p-3"
-                :class="{
-                  'bg-primary text-white max-w-md rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-sm': message.role === 'human',
-                  'bg-gray-100 text-black min-w-xs max-w-lg rounded-tl-xl rounded-tr-xl rounded-br-xl': message.role === 'ai',
-                }"
-              >
+              <div class="p-3" :class="{
+                'bg-primary text-white max-w-md rounded-tl-xl rounded-tr-xl rounded-bl-xl shadow-sm': message.role === 'human',
+                'bg-gray-100 text-black min-w-xs max-w-lg rounded-tl-xl rounded-tr-xl rounded-br-xl': message.role === 'ai',
+              }">
                 <div v-html="formatMessage(message.content)"></div>
                 <slot name="message-footer" :message="message" :index="index"></slot>
               </div>
-              <DisputeTypes
-                v-if="message.type === 'start'"
-                class="pt-2 max-w-2xl min-w-xs"
-                :disputes="disputes"
-                @active-dispute="handleActiveDispute"
-              />
-              <Attachment
-                v-else-if="message.type === 'attachment'"
-                class="pt-2 max-w-2xl min-w-xs"
-                @attachment-selected="handleAttachmentSelected"
-              />
+              <DisputeTypes v-if="message.type === 'start'" class="pt-2 max-w-2xl min-w-xs" :disputes="disputes"
+                @active-dispute="handleActiveDispute" />
+              <Attachment v-else-if="message.type === 'attachment'" class="pt-2 max-w-2xl min-w-xs"
+                @attachment-selected="handleAttachmentSelected" />
             </div>
             <!-- <div v-if="message.role === 'human'" class="bg-gray-500 rounded-full h-10 w-10 flex-shrink-0">
               <img v-if="photo && photo !== 'undefined'" :src="`data:image/jpeg;base64,${photo}`" class="rounded-full h-full w-full" alt="sender" />
@@ -77,9 +63,7 @@
       <!-- <Spinner size="xl" /> -->
     </div>
     <!-- query input -->
-    <div
-      class="bg-white sticky bottom-0 right-0 px-4 py-4"
-    >
+    <div class="bg-white sticky bottom-0 right-0 px-4 py-4">
       <slot name="query-input"></slot>
     </div>
   </div>

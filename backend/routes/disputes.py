@@ -1,12 +1,20 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from db import SessionLocal, get_split_chat_history, update_evidence_metadata
-from models import DisputeSubmissionDB  # Your ORM dispute model
+from db import DisputeSubmissionDB, SessionLocal, get_split_chat_history, update_evidence_metadata
+# from models import DisputeSubmission  # Correct model name (not DisputeSubmissionDB)
 from agents.dispute_resolution import DisputeResolver
 from video_analysis import analyze_video
 import asyncio
+from pydantic import BaseModel
 
 router = APIRouter()
+
+class ChatRequest(BaseModel):
+    conversation_context: str
+    message: str
+
+class FinalizeDisputeRequest(BaseModel):
+    additional_info: str  # Example of additional input
 
 # This dependency matches the one defined in db.py,
 # ensuring the session is correctly created and closed.
@@ -18,7 +26,7 @@ def get_db():
         db.close()
 
 @router.post("/{dispute_id}/finalize", response_model=dict)
-async def finalize_dispute(dispute_id: str, db: Session = Depends(get_db)):
+async def finalize_dispute(dispute_id: str, payload: FinalizeDisputeRequest, db: Session = Depends(get_db)):
     """
     Finalizes a dispute resolution by retrieving dispute details, associated evidence,
     and splitting chat history into pre and post dispute segments. Then, it calls the
@@ -54,6 +62,9 @@ async def finalize_dispute(dispute_id: str, db: Session = Depends(get_db)):
     # Instantiate the dispute resolution AI agent.
     dispute_resolver = DisputeResolver()
 
+    # Use the additional input from the payload
+    additional_info = payload.additional_info
+
     # Finalize the resolution using the AI agent.
     final_result = await dispute_resolver.finalize_resolution(dispute, evidence=evidence)
 
@@ -67,7 +78,7 @@ async def finalize_dispute(dispute_id: str, db: Session = Depends(get_db)):
             "dispute_type": dispute.dispute_type,
             "amount": dispute.amount,
             "currency": dispute.currency,
-            "additional_info": dispute.additional_info,
+            "additional_info": additional_info,
             "created_at": str(dispute.created_at)
         },
         "chat_history": {
@@ -84,3 +95,32 @@ async def finalize_dispute(dispute_id: str, db: Session = Depends(get_db)):
     }
 
     return summary
+
+@router.post("/{dispute_id}/chat", response_model=dict)
+async def interactive_dispute_chat(dispute_id: str, payload: ChatRequest, db: Session = Depends(get_db)):
+    """
+    Endpoint for interactive dispute chat.
+    Expects a JSON payload with:
+      - "conversation_context": String representing the conversation so far.
+      - "message": The new message sent by the user.
+    Returns the AI-generated response which includes guidance, suggestions, and any evidence request.
+    """
+    try:
+        dispute_id_int = int(dispute_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid dispute id.")
+
+    dispute = db.query(DisputeSubmissionDB).filter(DisputeSubmissionDB.id == dispute_id_int).first()
+    if not dispute:
+        raise HTTPException(status_code=404, detail="Dispute not found")
+    
+    conversation_context = payload.conversation_context
+    new_message = payload.message
+    
+    if not new_message:
+        raise HTTPException(status_code=400, detail="Message must be provided.")
+    
+    dispute_resolver = DisputeResolver()
+    result = await dispute_resolver.interactive_chat(dispute, conversation_context, new_message)
+    
+    return result

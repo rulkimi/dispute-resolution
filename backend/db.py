@@ -3,6 +3,7 @@ import datetime
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, Float, JSON, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from zoneinfo import ZoneInfo
 
 # Use the DATABASE_URL environment variable if provided, otherwise default to a local SQLite DB
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./test.db")
@@ -24,7 +25,7 @@ class ChatMessageDB(Base):
     sender_id = Column(String, index=True)
     receiver_id = Column(String, index=True)
     message = Column(Text)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.datetime.now(ZoneInfo("Asia/Kuala_Lumpur")))
     dispute_id = Column(String, nullable=True)
     flagged = Column(Boolean, default=False)
 
@@ -40,7 +41,7 @@ class DisputeSubmissionDB(Base):
     currency = Column(String)
     additional_info = Column(Text, nullable=True)
     status = Column(String, default="pending")
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.datetime.now(ZoneInfo("Asia/Kuala_Lumpur")))
     evidence = relationship("EvidenceDB", back_populates="dispute", uselist=False)
 
 # Database model for evidence provided in a dispute.

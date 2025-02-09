@@ -1,11 +1,13 @@
-from models import DisputeSubmission, Evidence
+from db import DisputeSubmissionDB, get_split_chat_history, update_evidence_metadata
+from models import Evidence
 import vertexai
 from vertexai.generative_models import GenerativeModel
 import os
 from dotenv import load_dotenv
 import asyncio
 import json
-from db import get_split_chat_history  # Import the helper function
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
 
 load_dotenv()
 
@@ -13,30 +15,26 @@ PROJECT_ID = os.environ.get("PROJECT_ID")
 vertexai.init(project=PROJECT_ID, location="us-central1")
 
 from video_analysis import analyze_video  # Import the video analysis function
-from db import update_evidence_metadata  # Import the function to update evidence metadata
+
+Base = declarative_base()
 
 class DisputeResolver:
     def __init__(self):
         self.model = GenerativeModel("gemini-2.0-flash-001")
 
-    async def resolve(self, dispute: DisputeSubmission, evidence: Evidence = None) -> dict:
+    async def resolve(self, dispute: DisputeSubmissionDB, evidence: Evidence = None) -> dict:
         """
         Resolves a dispute using AI analysis.
 
         Args:
-            dispute: The dispute submission details.
+            dispute: The dispute submission details (SQLAlchemy model instance).
             evidence: Optional evidence provided.
 
         Returns:
-            A dictionary representing the resolution.  Includes:
-            - status:  "approved", "rejected", or "escalated"
-            - reason:  A textual explanation of the decision.
-            - confidence: (Optional) A score from 0 to 1 indicating confidence.
-            - requires_human_review: (Optional) Boolean flag.
+            A dictionary representing the resolution.
         """
-
         prompt = f"""
-        You are a dispute resolution expert for a P2P platform.  Analyze the following dispute and provide a resolution:
+        You are a dispute resolution expert for a P2P platform. Analyze the following dispute and provide a resolution:
 
         Transaction ID: {dispute.transaction_id}
         Dispute Type: {dispute.dispute_type}
@@ -76,9 +74,6 @@ class DisputeResolver:
 
         try:
             response = self.model.generate_content(prompt)
-            # In a real application, you would parse the response more carefully,
-            # potentially using a structured output format (e.g., JSON) from the LLM.
-            # Here, we'll do a simple text-based parsing.
             text_response = response.text.lower()
 
             if "approved" in text_response:
@@ -90,7 +85,7 @@ class DisputeResolver:
 
             return {
                 "status": status,
-                "reason": response.text,  # Full text for now
+                "reason": response.text,
                 "requires_human_review": status == "escalated"
             }
 
@@ -105,12 +100,6 @@ class DisputeResolver:
     async def resolve_from_chat(self, chat_context: str) -> dict:
         """
         Resolves a dispute chat message using AI analysis.
-        Analyzes the chat context (which includes profile data and user message) and provides a resolution suggestion
-        along with guidance on whether further evidence is needed.
-        Returns a dictionary with:
-          - status: e.g. "approved", "escalated", "evidence_requested"
-          - reason: Explaining text
-          - requires_human_review: Boolean flag indicating if escalation is necessary
         """
         prompt = f"""
         You are an AI dispute resolution assistant. Given the following context from a dispute chat conversation,
@@ -130,7 +119,7 @@ class DisputeResolver:
         except Exception as e:
             return {"status": "escalated", "reason": f"AI resolution failed: {e}", "requires_human_review": True}
 
-    async def finalize_resolution(self, dispute: DisputeSubmission, evidence: Evidence = None) -> dict:
+    async def finalize_resolution(self, dispute: DisputeSubmissionDB, evidence: Evidence = None) -> dict:
         """
         Finalizes the dispute resolution workflow by integrating all available information.
         This method gathers:
@@ -183,14 +172,52 @@ class DisputeResolver:
         except Exception as e:
             return {"status": "escalated", "reason": f"Final resolution failed: {e}", "requires_human_review": True}
 
-    async def _release_funds(self, dispute: DisputeSubmission):
+    async def interactive_chat(self, dispute: DisputeSubmissionDB, conversation_context: str, new_message: str) -> dict:
+        """
+        Interactively chat with the user regarding dispute resolution.
+        This method uses the full dispute context and prior conversation,
+        and it instructs the AI to provide authoritative next steps (such as requesting additional evidence).
+        The AI's response is formatted in JSON for clarity.
+        """
+        prompt = f"""
+        You are an authoritative dispute resolution expert on a P2P platform. 
+        You are specialized in resolving disputes between sellers and buyers and understand the complete dispute workflow.
+        
+        Dispute Details:
+        Transaction ID: {dispute.transaction_id}
+        Dispute Type: {dispute.dispute_type}
+        Amount: {dispute.amount} {dispute.currency}
+        Additional Information: {dispute.additional_info or "None"}
+        
+        Conversation so far:
+        {conversation_context}
+        
+        User's new message: "{new_message}"
+        
+        Based on the above, please provide your next authoritative response to help resolve the dispute.
+        Format your response as JSON with the following keys:
+          "response": "Your suggested text response",
+          "action": "Any recommended next steps (optional)",
+          "request_evidence": "Specific evidence you need from the user (optional)"
+        """
+        try:
+            response = self.model.generate_content(prompt)
+            result = json.loads(response.text)
+            return result
+        except Exception as e:
+            return {"response": f"Error generating response: {e}", "action": "", "request_evidence": ""}
+
+    async def _release_funds(self, dispute: DisputeSubmissionDB):
         # Placeholder for fund release logic.  This would interact with a
         # payment gateway or internal accounting system.
         print(f"Funds released for transaction {dispute.transaction_id}")
         pass  # Replace with actual implementation
 
-    async def _escalate_to_human(self, dispute: DisputeSubmission, reason: str):
+    async def _escalate_to_human(self, dispute: DisputeSubmissionDB, reason: str):
         # Placeholder for escalating to a human agent.  This might involve
         # creating a ticket in a support system, sending a notification, etc.
         print(f"Dispute {dispute.transaction_id} escalated to human review. Reason: {reason}")
         pass  # Replace with actual implementation
+
+def get_dispute_by_id(session: Session, dispute_id: int):
+    return session.query(DisputeSubmissionDB).filter(DisputeSubmissionDB.id == dispute_id).first()
