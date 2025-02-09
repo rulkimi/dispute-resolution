@@ -6,3 +6,6 @@ python-dotenv
 google-cloud-aiplatform
 google-generativeai
 python-multipart
+sqlalchemy
+pytz
+requests 

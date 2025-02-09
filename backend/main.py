@@ -3,8 +3,20 @@ from fastapi import FastAPI
 from chat import router as chat_router
 from dispute import router as dispute_router
 from db import init_db  # Import the init_db function
+from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI()
+
+origins = ["http://localhost:5173"]
+
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=origins,
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+)
 
 # Initialize the database (creates tables if they don't exist)
 init_db()

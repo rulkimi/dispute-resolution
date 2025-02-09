@@ -49,7 +49,7 @@ const sendMessage = async () => {
     messages.value.push({ role: 'human', content: query.value, type: 'text' });
 
     try {
-      const response = await fetch('/api/send', {
+      const response = await fetch(`http://localhost:8000/chat/dispute/send?dispute_id=${activeOrderId.value}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

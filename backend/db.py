@@ -51,7 +51,7 @@ class EvidenceDB(Base):
     file_type = Column(String)
     upload_timestamp = Column(DateTime, default=datetime.datetime.utcnow)
     verification_status = Column(String, nullable=True)
-    metadata = Column(JSON, default={})
+    evidence_metadata = Column(JSON, default={}) 
     dispute_id = Column(Integer, ForeignKey("disputes.id"))
     dispute = relationship("DisputeSubmissionDB", back_populates="evidence")
 
