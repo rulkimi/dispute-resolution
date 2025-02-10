@@ -1,0 +1,133 @@
+@import url('https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css');
+
+nav {
+  position: fixed;
+  width: 100%;
+  background-color: #d9d9d9;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  top: 0;
+  z-index: 20;
+}
+
+nav > div {
+  width: 100%;
+  max-width: 36rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+  padding: 0 1rem;
+  margin: 0 auto;
+}
+
+nav h1 {
+  color: white;
+  font-size: 1.25rem;
+}
+
+nav h1 > strong {
+  color: #ef233c;
+}
+
+nav .login {
+  position: absolute;
+  right: 0;
+  display: flex;
+  margin-left: auto;
+}
+
+nav button {
+  color: white;
+  padding: 0.25rem 1rem;
+  border-radius: 0.25rem;
+}
+
+.avatar {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 9999px;
+}
+
+.container-sm {
+  width: 100%;
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+.message {
+  margin: 0.5rem 0;
+  width: 100%;
+}
+
+.message span {
+  margin-left: 2.75rem;
+  font-size: 0.75rem;
+  color: #a0aec0;
+}
+
+.message .text {
+  margin: 0 0.5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  /* color: white; */
+}
+
+.bottom {
+  position: fixed;
+  bottom: 0;
+  background-color: #d9d9d9;
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+}
+
+.bottom form {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bottom form input {
+  flex-grow: 1;
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-right: 0.25rem;
+  border-radius: 0.25rem;
+  border: solid;
+  /* background-color: #4a5568; */
+  /* color: white; */
+}
+
+.icon-send {
+  color: #ef233c;
+  width: 3rem;
+  height: 3rem;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.bg-primary {
+  background-color: #FF444F;
+}
+
+.error {
+  color: #FF444F;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #4a5568;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #e5e7eb;
+}
